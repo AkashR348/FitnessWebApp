@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Fitness Tracker{% endblock %}</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <a class="navbar-brand" href="{% url 'fitness_app:exercise_page' %}">Fitness Tracker</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'fitness_app:exercise_page' %}">Exercises</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'fitness_app:food_entry_page' %}">Food Entries</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'fitness_app:summary_page' %}">Weekly Summary</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'fitness_app:signup' %}">Sign up</a>
+            </ul>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        {% block content %}
+        <!-- Page-specific content will go here -->
+        {% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer bg-light text-center py-3 mt-5">
+        <div class="container">
+            <span class="text-muted">&copy; 2024 Fitness Tracker</span>
+        </div>
+    </footer>
+</body>
+</html>
