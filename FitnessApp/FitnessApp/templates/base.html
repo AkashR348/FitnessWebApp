@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Fitness Tracker{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- jQuery and Bootstrap JavaScript -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+
 </head>
 <body>
     <!-- Navbar -->
@@ -19,7 +23,7 @@
                     <a class="nav-link" href="{% url 'fitness_app:exercise_page' %}">Exercises</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'fitness_app:food_entry_page' %}">Food Entries</a>
+                    <a class="nav-link" href="{% url 'fitness_app:food_page' %}">Food Entries</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'fitness_app:summary_page' %}">Weekly Summary</a>
@@ -45,3 +49,31 @@
     </footer>
 </body>
 </html>
+
+<script>
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+    const csrftoken = getCookie('csrftoken');
+
+    $.ajaxSetup({
+        beforeSend: function(xhr, settings) {
+            if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+                // Only send the token to same-origin requests.
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+</script>
+
