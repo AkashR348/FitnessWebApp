@@ -112,6 +112,7 @@ def signup(request):
 
 
 def view_exercise(request):
+    print("work")
     date_str = request.GET.get('date')
     
     try:
