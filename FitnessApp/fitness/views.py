@@ -135,3 +135,8 @@ def view_exercise(request):
     ]
     
     return JsonResponse({'success': True, 'exercises': exercise_data})
+
+
+@login_required
+def profile(request):
+    return render(request, 'fitness_app/profile.html')

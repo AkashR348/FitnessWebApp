@@ -13,5 +13,6 @@ urlpatterns = [
     path('summary/', views.weekly_summary_page, name='summary_page'),
     path('create_food_entry/', views.create_food_entry, name='create_food_entry'),
     path('signup/', views.signup, name='signup'),
+    path('accounts/profile/', views.profile, name='profile'),
     
 ]
