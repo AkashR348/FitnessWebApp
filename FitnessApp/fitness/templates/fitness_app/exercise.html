@@ -67,6 +67,22 @@
             </div>
             <div class="modal-body" id="exercise-list-content">
                 <!-- Exercise list for the selected day will be dynamically loaded here -->
+                {% if exercise %}
+    <ul class="list-group">
+        {% for exercise in exercise %}
+            <li class="list-group-item">
+                <h5>{{ exercise.name }}</h5>
+                <p>Duration: {{ exercise.duration }} minutes</p>
+                <p>Calories Burned: {{ exercise.calories_burned }} kcal</p>
+                <p>Start Time: {{ exercise.start_time }}</p>
+                <p>Date: {{ exercise.date }}</p>
+            </li>
+        {% endfor %}
+    </ul>
+{% else %}
+    <p>No exercises recorded for this day.</p>
+{% endif %}
+
             </div>
         </div>
     </div>
@@ -78,71 +94,45 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
 <script>
-    $(document).ready(function () {
-        // CSRF setup for Django AJAX requests
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
-        }
-        const csrftoken = getCookie('csrftoken');
+    document.addEventListener('DOMContentLoaded', function () {
+        const form = document.getElementById('addExerciseForm');
 
-        $.ajaxSetup({
-            beforeSend: function(xhr, settings) {
-                if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
-                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                }
-            }
-        });
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();  // Prevent the traditional form submission
 
-        // Handle form submission for adding a new exercise
-        $('#addExerciseForm').on('submit', function (e) {
-            e.preventDefault();
+            const formData = new FormData(form);
 
-            $.ajax({
-                type: 'POST',
-                url: '{% url "fitness_app:create_exercise" %}',
-                data: $(this).serialize(),
-                success: function (response) {
-                    if (response.success) {
-                        $('#addExerciseModal').modal('hide');  // Hide modal on success
-                        $('#addExerciseForm')[0].reset();  // Reset the form fields
-
-                        // Add the new exercise to the View Exercises modal
-                        const exercise = response.exercise;
-                        const exerciseHtml = 
-                        `
-                            <li class="list-group-item">
-                                <h5>${exercise.name}</h5>
-                                <p>Duration: ${exercise.duration} minutes</p>
-                                <p>Calories Burned: ${exercise.calories_burned} kcal</p>
-                                <p>Start Time: ${exercise.start_time}</p>
-                                <p>Date: ${exercise.date}</p>
-                            </li>
-                        `;
-                        $('#exercise-list-content').append(exerciseHtml);  // Append new exercise
-
-                        // Optionally update daily totals in the box
-                        const currentTotalCalories = parseInt($('#total-calories').text(), 10) || 0;
-                        const currentTotalDuration = parseInt($('#total-duration').text(), 10) || 0;
-                        $('#total-calories').text(currentTotalCalories + exercise.calories_burned);
-                        $('#total-duration').text(currentTotalDuration + exercise.duration);
-                    } else {
-                        alert("An error occurred. Please check your input and try again.");
-                    }
+            fetch('{% url "fitness_app:create_exercise" %}', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',  // Add CSRF token if required
                 },
-                error: function () {
-                    alert("An error occurred. Please try again.");
+                body: formData,
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Close modal, reset form, and update the exercise list
+                    $('#addExerciseModal').modal('hide');
+                    form.reset();
+
+                    const exerciseHtml = `
+                        <li class="list-group-item">
+                            <h5>${data.exercise.name}</h5>
+                            <p>Duration: ${data.exercise.duration} minutes</p>
+                            <p>Calories Burned: ${data.exercise.calories_burned} kcal</p>
+                            <p>Start Time: ${data.exercise.start_time}</p>
+                            <p>Date: ${data.exercise.date}</p>
+                        </li>
+                    `;
+                    document.getElementById('exercise-list-content').insertAdjacentHTML('beforeend', exerciseHtml);
+                } else {
+                    alert("An error occurred: " + JSON.stringify(data.errors));
                 }
+            })
+            .catch(error => {
+                console.error("Fetch error:", error);
+                alert("An error occurred. Please try again.");
             });
         });
     });
