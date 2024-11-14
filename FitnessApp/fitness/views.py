@@ -15,22 +15,31 @@ from django.views.decorators.http import require_POST
 
 # Publicly accessible pages
 def exercise_page(request):
-    # Get today's date and the current week's dates
     today = datetime.now().date()
-    start_of_week = today - timedelta(days=today.weekday())  # Monday
+    start_of_week = today - timedelta(days=today.weekday())
     dates_of_week = [start_of_week + timedelta(days=i) for i in range(7)]
-    
-    # Dictionary to hold exercises and summaries for each day
+
     week_data = {}
-    for day_date in dates_of_week:
-        exercises = Exercise.objects.filter(user=request.user, date=day_date)
-        total_time = sum(exercise.duration for exercise in exercises)
-        total_calories = sum(exercise.calories_burned for exercise in exercises)
-        week_data[day_date] = {
-            'exercises': exercises,
-            'total_time': total_time,
-            'total_calories': total_calories,
-        }
+
+    if request.user.is_authenticated:
+        # Fetch exercises for the logged-in user
+        for day_date in dates_of_week:
+            exercises = Exercise.objects.filter(user=request.user, date=day_date)
+            total_time = sum(exercise.duration for exercise in exercises)
+            total_calories = sum(exercise.calories_burned for exercise in exercises)
+            week_data[day_date] = {
+                'exercises': exercises,
+                'total_time': total_time,
+                'total_calories': total_calories,
+            }
+    else:
+        # For anonymous users, provide empty data or a placeholder message
+        for day_date in dates_of_week:
+            week_data[day_date] = {
+                'exercises': [],  # No exercises to show
+                'total_time': 0,
+                'total_calories': 0,
+            }
 
     return render(request, 'fitness_app/exercise.html', {'week_data': week_data})
 
@@ -110,7 +119,7 @@ def signup(request):
         form = SignUpForm()
     return render(request, 'fitness_app/signup.html', {'form': form})
 
-@login_required
+
 def view_exercise(request):
     date_str = request.GET.get('date')
     
