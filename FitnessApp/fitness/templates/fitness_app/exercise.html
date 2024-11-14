@@ -87,17 +87,11 @@
         // Retrieve the exercise details from form inputs
         const date = document.getElementById("exercise-date").value;
         const name = document.getElementById("exercise-name").value;
-        const duration = document.getElementById("exercise-duration").value;
-        const calories_burned = document.getElementById("exercise-calories").value;
-        
+        const duration = parseInt(document.getElementById("exercise-duration").value);
+        const calories_burned = parseInt(document.getElementById("exercise-calories").value);
     
         // Create an exercise object
-        const exercise = {
-            date,
-            name,
-            duration,
-            calories_burned
-        };
+        const exercise = { date, name, duration, calories_burned };
     
         // Retrieve existing exercises from sessionStorage or initialize an empty array
         let exercises = JSON.parse(sessionStorage.getItem("exercises")) || [];
@@ -108,9 +102,31 @@
         // Save the updated exercises array back to sessionStorage
         sessionStorage.setItem("exercises", JSON.stringify(exercises));
     
+        // Update the total duration and calories burned for the day
+        updateTotals();
+    
         // Close the Add Exercise modal and reset the form
         $('#addExerciseModal').modal('hide');
         document.getElementById("addExerciseForm").reset();
+    }
+    
+    function updateTotals() {
+        // Retrieve all exercises from sessionStorage
+        const exercises = JSON.parse(sessionStorage.getItem("exercises")) || [];
+    
+        // Initialize total counters
+        let totalDuration = 0;
+        let totalCalories = 0;
+    
+        // Calculate the totals for the current day
+        exercises.forEach(exercise => {
+            totalDuration += exercise.duration;
+            totalCalories += exercise.calories_burned;
+        });
+    
+        // Update the HTML with the new totals
+        document.getElementById("total-duration").textContent = totalDuration;
+        document.getElementById("total-calories").textContent = totalCalories;
     }
     
     function viewData() {
@@ -138,6 +154,7 @@
             exerciseListContent.appendChild(exerciseItem);
         });
     }
+    
     
 
 
