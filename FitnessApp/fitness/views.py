@@ -72,26 +72,7 @@ def weekly_summary_page(request):
 
 # Views requiring login for certain actions
 
-def create_exercise(request):
-    if request.method == 'POST':
-        form = ExerciseForm(request.POST)
-        if form.is_valid():
-            exercise = form.save(commit=False)
-            exercise.user = request.user
-            exercise.save()
-            # Return JSON with the new exercise data
-            return JsonResponse({
-                'success': True,
-                'exercise': {
-                    'name': exercise.name,
-                    'duration': exercise.duration,
-                    'calories_burned': exercise.calories_burned,
-                    'start_time': exercise.start_time.strftime('%H:%M') if exercise.start_time else "N/A",
-                    'date': exercise.date.strftime('%Y-%m-%d')
-                }
-            })
-    # Return error if form is invalid
-    return JsonResponse({'success': False, 'errors': form.errors}, status=400)
+
 
 
 def create_food_entry(request):
@@ -120,30 +101,7 @@ def signup(request):
     return render(request, 'fitness_app/signup.html', {'form': form})
 
 
-def view_exercise(request):
-    date_str = request.GET.get('date')
-    
-    try:
-        date = datetime.strptime(date_str, '%Y-%m-%d').date()
-    except (ValueError, TypeError):
-        return JsonResponse({'success': False, 'error': 'Invalid date format'}, status=400)
-    
-    # Query exercises for the specified date
-    exercises = Exercise.objects.filter(user=request.user, date=date)
-    
-    # Prepare exercise data as a list of dictionaries
-    exercise_data = [
-        {
-            'name': exercise.name,
-            'duration': exercise.duration,
-            'calories_burned': exercise.calories_burned,
-            'start_time': exercise.start_time.strftime('%H:%M') if exercise.start_time else "N/A",
-            'date': exercise.date.strftime('%Y-%m-%d')
-        }
-        for exercise in exercises
-    ]
-    
-    return JsonResponse({'success': True, 'exercises': exercise_data})
+
 
 
 @login_required
