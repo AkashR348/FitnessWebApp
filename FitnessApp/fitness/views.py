@@ -62,7 +62,7 @@ def weekly_summary_page(request):
     return render(request, 'fitness_app/summary.html', {'summaries': summaries})
 
 # Views requiring login for certain actions
-@login_required
+
 def create_exercise(request):
     if request.method == 'POST':
         form = ExerciseForm(request.POST)
@@ -84,7 +84,7 @@ def create_exercise(request):
     # Return error if form is invalid
     return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
-@login_required
+
 def create_food_entry(request):
     if request.method == 'POST':
         form = FoodEntryForm(request.POST)
