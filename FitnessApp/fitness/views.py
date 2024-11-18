@@ -107,7 +107,35 @@ def signup(request):
     return render(request, 'fitness_app/signup.html', {'form': form})
 
 
+<<<<<<< HEAD
 
+=======
+def view_exercise(request):
+    print("work")
+    date_str = request.GET.get('date')
+    
+    try:
+        date = datetime.strptime(date_str, '%Y-%m-%d').date()
+    except (ValueError, TypeError):
+        return JsonResponse({'success': False, 'error': 'Invalid date format'}, status=400)
+    
+    # Query exercises for the specified date
+    exercises = Exercise.objects.filter(user=request.user, date=date)
+    
+    # Prepare exercise data as a list of dictionaries
+    exercise_data = [
+        {
+            'name': exercise.name,
+            'duration': exercise.duration,
+            'calories_burned': exercise.calories_burned,
+            'start_time': exercise.start_time.strftime('%H:%M') if exercise.start_time else "N/A",
+            'date': exercise.date.strftime('%Y-%m-%d')
+        }
+        for exercise in exercises
+    ]
+    
+    return JsonResponse({'success': True, 'exercises': exercise_data})
+>>>>>>> 7d5dc98ab8631f6bea7fd0d8613510a64f613f3b
 
 
 @login_required
