@@ -45,24 +45,43 @@ def exercise_page(request):
 
 def food_page(request):
     today = datetime.now().date()
-    start_of_week = today - timedelta(days=today.weekday())  # Monday as start of the week
+    start_of_week = today - timedelta(days=today.weekday())
     dates_of_week = [start_of_week + timedelta(days=i) for i in range(7)]
-    
+
     week_food_data = {}
-    for day_date in dates_of_week:
-        food_entries = FoodEntry.objects.filter(user=request.user, date=day_date)
-        meal_totals = {
-            'breakfast': sum(entry.calories for entry in food_entries.filter(meal_type='breakfast')),
-            'lunch': sum(entry.calories for entry in food_entries.filter(meal_type='lunch')),
-            'dinner': sum(entry.calories for entry in food_entries.filter(meal_type='dinner')),
-            'snack': sum(entry.calories for entry in food_entries.filter(meal_type='snack')),
-        }
-        total_calories = sum(meal_totals.values())
-        week_food_data[day_date] = {
-            'food_entries': food_entries,
-            'meal_totals': meal_totals,
-            'total_calories': total_calories,
-        }
+
+    if request.user.is_authenticated:
+        # Fetch food entries for each day of the week for the logged-in user
+        for day_date in dates_of_week:
+            food_entries = FoodEntry.objects.filter(user=request.user, date=day_date)
+
+            # Calculate total calories per meal type and overall total
+            meal_totals = {
+                'breakfast': sum(entry.calories for entry in food_entries if entry.meal_type == 'breakfast'),
+                'lunch': sum(entry.calories for entry in food_entries if entry.meal_type == 'lunch'),
+                'dinner': sum(entry.calories for entry in food_entries if entry.meal_type == 'dinner'),
+                'snack': sum(entry.calories for entry in food_entries if entry.meal_type == 'snack'),
+            }
+            total_calories = sum(meal_totals.values())
+
+            week_food_data[day_date] = {
+                'food_entries': food_entries,
+                'meal_totals': meal_totals,
+                'total_calories': total_calories,
+            }
+    else:
+        # For anonymous users, provide placeholder data
+        for day_date in dates_of_week:
+            week_food_data[day_date] = {
+                'food_entries': [],  # No food entries to show
+                'meal_totals': {
+                    'breakfast': 0,
+                    'lunch': 0,
+                    'dinner': 0,
+                    'snack': 0,
+                },
+                'total_calories': 0,
+            }
 
     return render(request, 'fitness_app/food.html', {'week_food_data': week_food_data})
 
@@ -70,22 +89,9 @@ def weekly_summary_page(request):
     summaries = WeeklySummary.objects.all()
     return render(request, 'fitness_app/summary.html', {'summaries': summaries})
 
-# Views requiring login for certain actions
 
 
 
-
-def create_food_entry(request):
-    if request.method == 'POST':
-        form = FoodEntryForm(request.POST)
-        if form.is_valid():
-            food_entry = form.save(commit=False)
-            food_entry.user = request.user
-            food_entry.save()
-            return redirect('fitness_app:food_entry_page')
-    else:
-        form = FoodEntryForm()
-    return render(request, 'fitness_app/create_food_entry.html', {'form': form})
 
 
 
