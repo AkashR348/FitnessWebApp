@@ -2,11 +2,11 @@ from datetime import datetime, timedelta
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Exercise, FoodEntry, WeeklySummary
-from .forms import ExerciseForm, FoodEntryForm  # Assuming you have forms for these models
 from django.contrib.auth import login
 from .forms import SignUpForm
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from .models import UserProfile, Exercise, FoodEntry
+
 
 
 
@@ -134,6 +134,45 @@ def view_exercise(request):
     
     return JsonResponse({'success': True, 'exercises': exercise_data})
 
+
+from .models import UserProfile, ExerciseEntry, FoodEntry
+
+def summary_view(request):
+    user_profile = UserProfile.objects.get(user=request.user)
+
+    today = datetime.now().date()
+    start_of_week = today - timedelta(days=today.weekday())
+    dates_of_week = [start_of_week + timedelta(days=i) for i in range(7)]
+
+    summaries = []
+    for day in dates_of_week:
+        exercises = ExerciseEntry.objects.filter(user=request.user, date=day)
+        foods = FoodEntry.objects.filter(user=request.user, date=day)
+
+        total_calories_burned = sum(exercise.calories_burned for exercise in exercises)
+        total_time_spent = sum(exercise.duration for exercise in exercises)
+        total_calories_eaten = sum(food.calories for food in foods)
+
+        # Calculate progress as percentages of the user's goals
+        progress_burned = min(100, (total_calories_burned / user_profile.goal_calories_burned) * 100)
+        progress_time = min(100, (total_time_spent / user_profile.goal_workout_duration) * 100)
+        progress_eaten = min(100, (total_calories_eaten / user_profile.goal_calories_eaten) * 100)
+
+        summaries.append({
+            'date': day,
+            'total_calories_burned': total_calories_burned,
+            'total_time_spent': total_time_spent,
+            'total_calories_eaten': total_calories_eaten,
+            'progress_burned': progress_burned,
+            'progress_time': progress_time,
+            'progress_eaten': progress_eaten,
+        })
+
+    context = {
+        'summaries': summaries,
+        'user_profile': user_profile
+    }
+    return render(request, 'fitness_app/summary.html', context)
 
 
 @login_required
