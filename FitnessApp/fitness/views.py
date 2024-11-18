@@ -107,9 +107,7 @@ def signup(request):
     return render(request, 'fitness_app/signup.html', {'form': form})
 
 
-<<<<<<< HEAD
 
-=======
 def view_exercise(request):
     print("work")
     date_str = request.GET.get('date')
@@ -135,7 +133,7 @@ def view_exercise(request):
     ]
     
     return JsonResponse({'success': True, 'exercises': exercise_data})
->>>>>>> 7d5dc98ab8631f6bea7fd0d8613510a64f613f3b
+
 
 
 @login_required

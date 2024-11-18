@@ -44,3 +44,10 @@ class WeeklySummary(models.Model):
     def __str__(self):
         return f"Week of {self.week_start_date} Summary for {self.user.username}"
 
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    goal_calories_burned = models.IntegerField(default=2000)  # Set default goals
+    goal_calories_eaten = models.IntegerField(default=15000)
+    goal_workout_duration = models.IntegerField(default=300)  # in minutes
+
