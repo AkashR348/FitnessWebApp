@@ -3,8 +3,6 @@
 {% block content %}
 <div class="container mt-5">
     <h1>Weekly Summary</h1>
-    <a href="{% url 'fitness_app:exercise_page' %}">Go to Exercise Entries</a>
-    <a href="{% url 'fitness_app:food_page' %}">Go to Food Entries</a>
 
     <div class="row">
         {% for summary in summaries %}

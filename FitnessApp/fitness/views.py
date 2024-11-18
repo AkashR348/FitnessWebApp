@@ -85,9 +85,7 @@ def food_page(request):
 
     return render(request, 'fitness_app/food.html', {'week_food_data': week_food_data})
 
-def weekly_summary_page(request):
-    summaries = WeeklySummary.objects.all()
-    return render(request, 'fitness_app/summary.html', {'summaries': summaries})
+
 
 
 
@@ -135,10 +133,12 @@ def view_exercise(request):
     return JsonResponse({'success': True, 'exercises': exercise_data})
 
 
-from .models import UserProfile, ExerciseEntry, FoodEntry
+
+
 
 def summary_view(request):
-    user_profile = UserProfile.objects.get(user=request.user)
+    # Ensure user profile exists or create one with default goals
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
 
     today = datetime.now().date()
     start_of_week = today - timedelta(days=today.weekday())
@@ -146,7 +146,7 @@ def summary_view(request):
 
     summaries = []
     for day in dates_of_week:
-        exercises = ExerciseEntry.objects.filter(user=request.user, date=day)
+        exercises = Exercise.objects.filter(user=request.user, date=day)
         foods = FoodEntry.objects.filter(user=request.user, date=day)
 
         total_calories_burned = sum(exercise.calories_burned for exercise in exercises)
@@ -173,6 +173,7 @@ def summary_view(request):
         'user_profile': user_profile
     }
     return render(request, 'fitness_app/summary.html', context)
+
 
 
 @login_required
