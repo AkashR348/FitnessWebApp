@@ -4,7 +4,21 @@
 <div class="container mt-5">
     <h1>Weekly Summary</h1>
 
-    <div class="row">
+
+    <!-- Goal Setting Form -->
+    <div class="card mt-4">
+        <div class="card-body">
+            <h3>Set Your Weekly Goals</h3>
+            <form method="post" action="">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Save Goals</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Weekly Summary Display -->
+    <div class="row mt-5">
         {% for summary in summaries %}
             <div class="col-md-4 mb-3">
                 <div class="card">
