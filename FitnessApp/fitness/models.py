@@ -44,3 +44,6 @@ class WeeklySummary(models.Model):
     def __str__(self):
         return f"Week of {self.week_start_date} Summary for {self.user.username}"
 
+
+
+

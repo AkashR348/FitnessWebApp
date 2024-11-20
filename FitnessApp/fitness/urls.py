@@ -1,4 +1,5 @@
-from django.urls import path
+from django.template.defaulttags import url
+from django.urls import path, include
 from . import views
 
 app_name = 'fitness_app'
@@ -14,5 +15,5 @@ urlpatterns = [
     path('create_food_entry/', views.create_food_entry, name='create_food_entry'),
     path('signup/', views.signup, name='signup'),
     path('accounts/profile/', views.profile, name='profile'),
-    
+    path('accounts/change_password/', views.change_password, name='change_password'),
 ]

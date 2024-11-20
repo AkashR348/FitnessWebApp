@@ -1,11 +1,18 @@
 from datetime import datetime, timedelta
+from http.client import HTTPResponse
+from tempfile import template
+
+from django.contrib.auth.forms import PasswordChangeForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from pyexpat.errors import messages
+
 from .models import Exercise, FoodEntry, WeeklySummary
 from .forms import ExerciseForm, FoodEntryForm  # Assuming you have forms for these models
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from .forms import SignUpForm
 from django.http import JsonResponse
+from django.template import RequestContext, loader
 from django.views.decorators.http import require_POST
 
 
@@ -82,6 +89,9 @@ def create_exercise(request):
                 }
             })
     # Return error if form is invalid
+    exercise = Exercise(form.fields[0],form.fields[1],form.fields[2],form.fields[3],form.fields[4],form.fields[5], form.fields[5]+form.fields[3], datetime.today())
+    #context = exercise
+    #return render(request, "exercise.html", exercise)
     return JsonResponse({'success': False, 'errors': form.errors}, status=400)
 
 @login_required
@@ -140,3 +150,18 @@ def view_exercise(request):
 @login_required
 def profile(request):
     return render(request, 'fitness_app/profile.html')
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  #Don't log user out
+            messages.success(request, 'Your password was successfully updated!')
+            return redirect('change_password')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'fitness_app/change_password.html', {
+        'form': form
+    })

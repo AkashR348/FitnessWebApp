@@ -1,20 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <div>Username: </div>
+{% extends "base.html" %}
+
+{% block content %}
+
+<div>Username:  {{ user.get_username }}</div>
+<br>
+
+<div>Email: {{ user.email }} </div>
+<br>
+
+<button class="nav-item">Log Out<a class="nav-link" href="{% url 'logout' %}"></a></button>
 
 
-    <div>Email:  </div>
-
-
-    <button> Change Passowrd
-
+<button id="change" class="nav-item">Change Password<a class="nav-link" ></a>
+</button>
 
 
 
-</body>
-</html>
+<script type="text/javascript">
+    document.getElementById("change").onclick = function () {
+        location.href = "{% url 'fitness_app:change_password' %}";
+    };
+</script>
+{% endblock %}
+
+
+
