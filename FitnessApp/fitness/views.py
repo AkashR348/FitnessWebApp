@@ -14,7 +14,8 @@ from datetime import datetime, timedelta
 
 
 
-# Publicly accessible pages
+# Publicly accessible 
+
 def exercise_page(request):
     today = datetime.now().date()
     start_of_week = today - timedelta(days=today.weekday())
@@ -43,6 +44,7 @@ def exercise_page(request):
             }
 
     return render(request, 'fitness_app/exercise.html', {'week_data': week_data})
+
 
 def food_page(request):
     today = datetime.now().date()
@@ -90,10 +92,6 @@ def food_page(request):
 
 
 
-
-
-
-
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -107,37 +105,9 @@ def signup(request):
 
 
 
-def view_exercise(request):
-    print("work")
-    date_str = request.GET.get('date')
-    
-    try:
-        date = datetime.strptime(date_str, '%Y-%m-%d').date()
-    except (ValueError, TypeError):
-        return JsonResponse({'success': False, 'error': 'Invalid date format'}, status=400)
-    
-    # Query exercises for the specified date
-    exercises = Exercise.objects.filter(user=request.user, date=date)
-    
-    # Prepare exercise data as a list of dictionaries
-    exercise_data = [
-        {
-            'name': exercise.name,
-            'duration': exercise.duration,
-            'calories_burned': exercise.calories_burned,
-            'start_time': exercise.start_time.strftime('%H:%M') if exercise.start_time else "N/A",
-            'date': exercise.date.strftime('%Y-%m-%d')
-        }
-        for exercise in exercises
-    ]
-    
-    return JsonResponse({'success': True, 'exercises': exercise_data})
 
 
 
-
-
-# views.py
 
 
 def summary_view(request):
