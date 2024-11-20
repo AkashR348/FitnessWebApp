@@ -6,12 +6,7 @@ from django.contrib.auth import login
 from .forms import SignUpForm
 from django.http import JsonResponse
 from .models import UserProfile, Exercise, FoodEntry
-<<<<<<< HEAD
-from django.contrib.auth.models import AnonymousUser
-=======
->>>>>>> parent of 8442e54 (created the basic goal submission form)
-
-
+from .forms import GoalForm
 
 
 
@@ -115,8 +110,8 @@ def signup(request):
 
 
 
-<<<<<<< HEAD
-@login_required
+
+
 def summary_view(request):
     if not request.user.is_authenticated:
         # For unauthenticated users, show a placeholder message or redirect to login
@@ -126,11 +121,15 @@ def summary_view(request):
         })
 
     # Proceed for authenticated users
-=======
-def summary_view(request):
-    # Ensure user profile exists or create one with default goals
->>>>>>> parent of 8442e54 (created the basic goal submission form)
     user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = GoalForm(request.POST, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            return redirect('fitness_app:summary_page')  # Redirect to avoid re-posting on refresh
+    else:
+        form = GoalForm(instance=user_profile)
 
     today = datetime.now().date()
     start_of_week = today - timedelta(days=today.weekday())
@@ -145,7 +144,6 @@ def summary_view(request):
         total_time_spent = sum(exercise.duration for exercise in exercises)
         total_calories_eaten = sum(food.calories for food in foods)
 
-        # Calculate progress as percentages of the user's goals
         progress_burned = min(100, (total_calories_burned / user_profile.goal_calories_burned) * 100)
         progress_time = min(100, (total_time_spent / user_profile.goal_workout_duration) * 100)
         progress_eaten = min(100, (total_calories_eaten / user_profile.goal_calories_eaten) * 100)
@@ -162,9 +160,11 @@ def summary_view(request):
 
     context = {
         'summaries': summaries,
-        'user_profile': user_profile
+        'user_profile': user_profile,
+        'form': form
     }
     return render(request, 'fitness_app/summary.html', context)
+
 
 
 
