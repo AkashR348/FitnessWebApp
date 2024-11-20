@@ -8,13 +8,17 @@
 <div>Email: {{ user.email }} </div>
 <br>
 
-<button class="nav-item">Log Out<a class="nav-link" href="{% url 'logout' %}"></a></button>
 
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="btn btn-info" type="submit">Log Out</button>
+    </form>
+    <br>
 
-<button id="change" class="nav-item">Change Password<a class="nav-link" ></a>
-</button>
-
-
+<!--    <button id="change" class="nav-item"><a class="nav-link" >Change Password</a></button>-->
+    <a id="change" class="btn btn-info" role="button">Change_Password</a>
+{% endif %}
 
 <script type="text/javascript">
     document.getElementById("change").onclick = function () {
