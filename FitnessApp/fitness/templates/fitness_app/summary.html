@@ -4,21 +4,12 @@
 <div class="container mt-5">
     <h1>Weekly Summary</h1>
 
-
-    <!-- Goal Setting Form -->
-    <div class="card mt-4">
-        <div class="card-body">
-            <h3>Set Your Weekly Goals</h3>
-            <form method="post" action="">
-                {% csrf_token %}
-                {{ form.as_p }}
-                <button type="submit" class="btn btn-primary">Save Goals</button>
-            </form>
-        </div>
+    {% if not request.user.is_authenticated %}
+    <div class="alert alert-info" role="alert">
+        <p><strong>Welcome!</strong> You are currently not logged in. Please <a href="{% url 'login' %}">log in</a> or <a href="{% url 'signup' %}">sign up</a> to start tracking your exercises.</p>
     </div>
-
-    <!-- Weekly Summary Display -->
-    <div class="row mt-5">
+    {% else %}
+    <div class="row">
         {% for summary in summaries %}
             <div class="col-md-4 mb-3">
                 <div class="card">
@@ -49,5 +40,6 @@
             </div>
         {% endfor %}
     </div>
+    {% endif %}
 </div>
 {% endblock %}

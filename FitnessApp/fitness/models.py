@@ -4,14 +4,11 @@ from datetime import datetime, timedelta
 
 class Exercise(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    day = models.CharField(max_length=10)  # Ex: "Monday", "Tuesday"
-    title = models.CharField(max_length=100, blank=True, null=True)  # Optional title for the day (e.g., "Leg Day")
-    name = models.CharField(max_length=100)  # Exercise name (e.g., "Running")
-    duration = models.PositiveIntegerField()  # Duration in minutes
-    calories_burned = models.PositiveIntegerField()  # Calories burned
-    start_time = models.TimeField()  # Time the exercise started
-    end_time = models.TimeField(blank=True, null=True)  # Calculated end time based on duration
-    date = models.DateField(auto_now_add=True)  # Automatically stores the date when the entry was created
+    day = models.CharField(max_length=20, null=True, blank=True)  # Example for a day field
+    name = models.CharField(max_length=255)
+    duration = models.IntegerField()  # Duration in minutes
+    calories_burned = models.IntegerField()
+    date = models.DateField()  # Ensure you have this field
 
     def save(self, *args, **kwargs):
         # Automatically calculate end time based on start time and duration

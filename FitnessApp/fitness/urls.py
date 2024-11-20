@@ -4,7 +4,7 @@ from . import views
 app_name = 'fitness_app'
 
 urlpatterns = [
-    path("", views.summary_view, name="index"),
+    path("", views.summary_view, name="summary_page"),
     path('exercise/', views.exercise_page, name='exercise_page'),
     path('food/', views.food_page, name='food_page'),
     path('summary/', views.summary_view,name='summary_page'),

@@ -1,12 +1,14 @@
 from datetime import datetime, timedelta
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from .models import Exercise, FoodEntry, WeeklySummary
 from django.contrib.auth import login
 from .forms import SignUpForm
 from django.http import JsonResponse
 from .models import UserProfile, Exercise, FoodEntry
-from .forms import GoalForm
-from datetime import datetime, timedelta
+from django.contrib.auth.models import AnonymousUser
+
+
 
 
 
@@ -15,7 +17,7 @@ from datetime import datetime, timedelta
 
 
 # Publicly accessible 
-
+@login_required
 def exercise_page(request):
     today = datetime.now().date()
     start_of_week = today - timedelta(days=today.weekday())
@@ -45,7 +47,7 @@ def exercise_page(request):
 
     return render(request, 'fitness_app/exercise.html', {'week_data': week_data})
 
-
+@login_required
 def food_page(request):
     today = datetime.now().date()
     start_of_week = today - timedelta(days=today.weekday())
@@ -110,7 +112,16 @@ def signup(request):
 
 
 
+@login_required
 def summary_view(request):
+    if not request.user.is_authenticated:
+        # For unauthenticated users, show a placeholder message or redirect to login
+        return render(request, 'fitness_app/summary.html', {
+            'summaries': [],
+            'error': 'Please log in to view your summary.',
+        })
+
+    # Proceed for authenticated users
     user_profile, created = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
