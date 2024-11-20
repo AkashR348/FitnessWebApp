@@ -20,6 +20,7 @@ class SignUpForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2']
+<<<<<<< HEAD
         
 class GoalForm(forms.Form):
     calories_burned_goal = forms.IntegerField()
@@ -29,3 +30,5 @@ class GoalForm(forms.Form):
         model = Goal
         fields = ['calories_burned_goal', 'time_spent_goal', 'calories _eaten_goal'] 
           
+=======
+>>>>>>> parent of 8442e54 (created the basic goal submission form)
