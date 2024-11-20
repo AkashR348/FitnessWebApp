@@ -111,23 +111,15 @@ def signup(request):
 
 
 
-
+@login_required
 def summary_view(request):
-    if not request.user.is_authenticated:
-        # For unauthenticated users, show a placeholder message or redirect to login
-        return render(request, 'fitness_app/summary.html', {
-            'summaries': [],
-            'error': 'Please log in to view your summary.',
-        })
-
-    # Proceed for authenticated users
     user_profile, created = UserProfile.objects.get_or_create(user=request.user)
 
     if request.method == 'POST':
         form = GoalForm(request.POST, instance=user_profile)
         if form.is_valid():
             form.save()
-            return redirect('fitness_app:summary_page')  # Redirect to avoid re-posting on refresh
+            return redirect('fitness_app:summary_view')  # Redirect to avoid re-posting on refresh
     else:
         form = GoalForm(instance=user_profile)
 
@@ -164,7 +156,6 @@ def summary_view(request):
         'form': form
     }
     return render(request, 'fitness_app/summary.html', context)
-
 
 
 

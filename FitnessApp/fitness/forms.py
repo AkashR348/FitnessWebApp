@@ -24,14 +24,21 @@ class SignUpForm(UserCreationForm):
         fields = ['username', 'email', 'password1', 'password2']
         
 
+# forms.py
+from django import forms
+from .models import UserProfile
+
 class GoalForm(forms.ModelForm):
     class Meta:
         model = UserProfile
         fields = ['goal_calories_burned', 'goal_calories_eaten', 'goal_workout_duration']
-
-    def clean(self):
-        cleaned_data = super().clean()
-        for field in ['goal_calories_burned', 'goal_calories_eaten', 'goal_workout_duration']:
-            if cleaned_data[field] < 0:
-                raise forms.ValidationError(f"{field.replace('_', ' ').capitalize()} must be non-negative.")
-        return cleaned_data
+        labels = {
+            'goal_calories_burned': 'Calories Burned Goal',
+            'goal_calories_eaten': 'Calories Eaten Goal',
+            'goal_workout_duration': 'Workout Duration Goal (minutes)',
+        }
+        widgets = {
+            'goal_calories_burned': forms.NumberInput(attrs={'class': 'form-control'}),
+            'goal_calories_eaten': forms.NumberInput(attrs={'class': 'form-control'}),
+            'goal_workout_duration': forms.NumberInput(attrs={'class': 'form-control'}),
+        }
