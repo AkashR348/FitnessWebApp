@@ -2,18 +2,20 @@ from datetime import datetime, timedelta
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Exercise, FoodEntry, WeeklySummary
-from .forms import ExerciseForm, FoodEntryForm  # Assuming you have forms for these models
 from django.contrib.auth import login
 from .forms import SignUpForm
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
+from .models import UserProfile, Exercise, FoodEntry
+from .forms import GoalForm
 
 
 
 
 
 
-# Publicly accessible pages
+
+# Publicly accessible 
+@login_required
 def exercise_page(request):
     today = datetime.now().date()
     start_of_week = today - timedelta(days=today.weekday())
@@ -41,8 +43,9 @@ def exercise_page(request):
                 'total_calories': 0,
             }
 
-    return render(request, 'fitness_app/exercise.html', {'week_data': week_data})
+    return render(request, 'fitness_app/exercise.html', { 'week_data': week_data })
 
+@login_required
 def food_page(request):
     today = datetime.now().date()
     start_of_week = today - timedelta(days=today.weekday())
@@ -83,13 +86,7 @@ def food_page(request):
                 'total_calories': 0,
             }
 
-    return render(request, 'fitness_app/food.html', {'week_food_data': week_food_data})
-
-def weekly_summary_page(request):
-    summaries = WeeklySummary.objects.all()
-    return render(request, 'fitness_app/summary.html', {'summaries': summaries})
-
-
+    return render(request, 'fitness_app/food.html', { 'week_food_data':week_food_data})
 
 
 
@@ -108,31 +105,57 @@ def signup(request):
 
 
 
-def view_exercise(request):
-    print("work")
-    date_str = request.GET.get('date')
-    
-    try:
-        date = datetime.strptime(date_str, '%Y-%m-%d').date()
-    except (ValueError, TypeError):
-        return JsonResponse({'success': False, 'error': 'Invalid date format'}, status=400)
-    
-    # Query exercises for the specified date
-    exercises = Exercise.objects.filter(user=request.user, date=date)
-    
-    # Prepare exercise data as a list of dictionaries
-    exercise_data = [
-        {
-            'name': exercise.name,
-            'duration': exercise.duration,
-            'calories_burned': exercise.calories_burned,
-            'start_time': exercise.start_time.strftime('%H:%M') if exercise.start_time else "N/A",
-            'date': exercise.date.strftime('%Y-%m-%d')
-        }
-        for exercise in exercises
-    ]
-    
-    return JsonResponse({'success': True, 'exercises': exercise_data})
+
+
+
+
+
+
+@login_required
+def summary_view(request):
+    user_profile, created = UserProfile.objects.get_or_create(user=request.user)
+
+    if request.method == 'POST':
+        form = GoalForm(request.POST, instance=user_profile)
+        if form.is_valid():
+            form.save()
+            return redirect('fitness_app:summary_view')  # Redirect to avoid re-posting on refresh
+    else:
+        form = GoalForm(instance=user_profile)
+
+    today = datetime.now().date()
+    start_of_week = today - timedelta(days=today.weekday())
+    dates_of_week = [start_of_week + timedelta(days=i) for i in range(7)]
+
+    summaries = []
+    for day in dates_of_week:
+        exercises = Exercise.objects.filter(user=request.user, date=day)
+        foods = FoodEntry.objects.filter(user=request.user, date=day)
+
+        total_calories_burned = sum(exercise.calories_burned for exercise in exercises)
+        total_time_spent = sum(exercise.duration for exercise in exercises)
+        total_calories_eaten = sum(food.calories for food in foods)
+
+        progress_burned = min(100, (total_calories_burned / user_profile.goal_calories_burned) * 100)
+        progress_time = min(100, (total_time_spent / user_profile.goal_workout_duration) * 100)
+        progress_eaten = min(100, (total_calories_eaten / user_profile.goal_calories_eaten) * 100)
+
+        summaries.append({
+            'date': day,
+            'total_calories_burned': total_calories_burned,
+            'total_time_spent': total_time_spent,
+            'total_calories_eaten': total_calories_eaten,
+            'progress_burned': progress_burned,
+            'progress_time': progress_time,
+            'progress_eaten': progress_eaten,
+        })
+
+    context = {
+        'summaries': summaries,
+        'user_profile': user_profile,
+        'form': form
+    }
+    return render(request, 'fitness_app/summary.html', context)
 
 
 
