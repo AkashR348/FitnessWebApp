@@ -10,5 +10,5 @@ urlpatterns = [
     path('summary/', views.weekly_summary_page, name='summary_page'),
     path('signup/', views.signup, name='signup'),
     path('accounts/profile/', views.profile, name='profile'),
-    
+    path('accounts/change_password/', views.change_password, name='change_password'),
 ]
