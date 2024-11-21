@@ -43,7 +43,7 @@ def exercise_page(request):
                 'total_calories': 0,
             }
 
-    return render(request, 'fitness_app/exercise.html', {'week_data': week_data})
+    return render(request, 'fitness_app/exercise.html', { 'week_data': week_data })
 
 @login_required
 def food_page(request):
@@ -86,7 +86,7 @@ def food_page(request):
                 'total_calories': 0,
             }
 
-    return render(request, 'fitness_app/food.html', {'week_food_data': week_food_data})
+    return render(request, 'fitness_app/food.html', { 'week_food_data':week_food_data})
 
 
 
