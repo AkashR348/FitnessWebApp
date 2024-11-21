@@ -13,7 +13,7 @@
                         <p>Total Time: <span id="total-duration">{{ data.total_time }}</span> minutes</p>
                         <p>Total Calories: <span id="total-calories">{{ data.total_calories }}</span> kcal</p>
                         <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addExerciseModal" onclick="setDate('{{ day|date:'m-d-Y' }}')">Add Exercise</button>
-                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#viewExercisesModal" onclick="viewData()">View Exercises</button>
+                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#viewExercisesModal" onclick="viewData('{{ day|date:'m-d-Y' }}')">View Exercises</button>
                     </div>
                 </div>
             </div>
@@ -129,7 +129,7 @@
         document.getElementById("total-calories").textContent = totalCalories;
     }
     
-    function viewData() {
+    function viewData(date) {
         // Retrieve exercises from sessionStorage
         const exercises = JSON.parse(sessionStorage.getItem("exercises")) || [];
     
@@ -153,6 +153,9 @@
             `;
             exerciseListContent.appendChild(exerciseItem);
         });
+
+        document.getElementById("view-modal-date").textContent = date;
+
     }
     
     

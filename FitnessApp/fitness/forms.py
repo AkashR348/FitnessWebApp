@@ -13,7 +13,7 @@ class ExerciseForm(forms.ModelForm):
 class FoodEntryForm(forms.ModelForm):
     class Meta:
         model = FoodEntry
-        fields = ['day', 'meal_type', 'calories', 'time_eaten']
+        fields = ['day', 'meal_type', 'calories', 'name', 'date']
         
         
 class SignUpForm(UserCreationForm):
