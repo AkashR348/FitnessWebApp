@@ -1,12 +1,15 @@
 from datetime import datetime, timedelta
+
+from django.contrib.auth.forms import PasswordChangeForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
-from .models import Exercise, FoodEntry, WeeklySummary
+from .models import Exercise, FoodEntry
 from django.contrib.auth import login
 from .forms import SignUpForm
-from django.http import JsonResponse
 from .models import UserProfile, Exercise, FoodEntry
 from .forms import GoalForm
+from django.contrib.auth import login, update_session_auth_hash
+
 
 
 
@@ -162,3 +165,18 @@ def summary_view(request):
 @login_required
 def profile(request):
     return render(request, 'fitness_app/profile.html')
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  #Don't log user out
+            #messages.success(request, 'Your password was successfully updated!')
+            return redirect('/')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'fitness_app/change_password.html', {
+        'form': form
+    })
