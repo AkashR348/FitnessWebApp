@@ -1,22 +1,30 @@
 {% extends "base.html" %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-    <div>Username: </div>
+{% block content %}
+
+<div>Username:  {{ user.get_username }}</div>
+<br>
+
+<div>Email: {{ user.email }} </div>
+<br>
 
 
-    <div>Email:  </div>
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="btn btn-info" type="submit">Log Out</button>
+    </form>
+    <br>
+
+    <a id="change" class="btn btn-info" role="button">Change_Password</a>
+{% endif %}
+
+<script type="text/javascript">
+    document.getElementById("change").onclick = function () {
+        location.href = "{% url 'fitness_app:change_password' %}";
+    };
+</script>
+{% endblock %}
 
 
-    <button> Change Passowrd
 
-
-
-
-</body>
-</html>

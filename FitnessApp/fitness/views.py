@@ -1,9 +1,11 @@
 from datetime import datetime, timedelta
+
+from django.contrib.auth.forms import PasswordChangeForm
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Exercise, FoodEntry, WeeklySummary
 from .forms import ExerciseForm, FoodEntryForm  # Assuming you have forms for these models
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from .forms import SignUpForm
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
@@ -107,9 +109,7 @@ def signup(request):
     return render(request, 'fitness_app/signup.html', {'form': form})
 
 
-<<<<<<< HEAD
 
-=======
 def view_exercise(request):
     print("work")
     date_str = request.GET.get('date')
@@ -135,9 +135,24 @@ def view_exercise(request):
     ]
     
     return JsonResponse({'success': True, 'exercises': exercise_data})
->>>>>>> 7d5dc98ab8631f6bea7fd0d8613510a64f613f3b
+
 
 
 @login_required
 def profile(request):
     return render(request, 'fitness_app/profile.html')
+
+@login_required
+def change_password(request):
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)  #Don't log user out
+            #messages.success(request, 'Your password was successfully updated!')
+            return redirect('/')
+    else:
+        form = PasswordChangeForm(request.user)
+    return render(request, 'fitness_app/change_password.html', {
+        'form': form
+    })
