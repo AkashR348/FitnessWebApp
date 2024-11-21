@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div>Username:  {{ user.get_username }}</div>
+<br>
+
+<div>Email: {{ user.email }} </div>
+<br>
+
+
+{% if user.is_authenticated %}
+    <form method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button class="btn btn-info" type="submit">Log Out</button>
+    </form>
+    <br>
+
+<!--    <button id="change" class="nav-item"><a class="nav-link" >Change Password</a></button>-->
+    <a id="change" class="btn btn-info" role="button">Change_Password</a>
+{% endif %}
+
+<script type="text/javascript">
+    document.getElementById("change").onclick = function () {
+        location.href = "{% url 'fitness_app:change_password' %}";
+    };
+</script>
+{% endblock %}
+
+
+

@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1>Weekly Summary</h1>
+    <a href="{% url 'fitness_app:exercise_page' %}">Go to Exercise Entries</a>
+    <a href="{% url 'fitness_app:food_page' %}">Go to Food Entries</a>
+
+    <div class="row">
+        {% for summary in summaries %}
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>Week Starting: {{ summary.week_start_date }}</h5>
+                        <p>Total Calories Burned: {{ summary.total_calories_burned }}</p>
+                        <p>Total Time Spent: {{ summary.total_time_spent }} minutes</p>
+                        <p>Total Calories Eaten: {{ summary.total_calories_eaten }}</p>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
