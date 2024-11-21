@@ -10,13 +10,13 @@
                 <div class="card h-100">
                     <div class="card-body">
                         <h5>{{ day|date:"l" }} - {{ day|date:"M d, Y" }}</h5>
-                        <p>Breakfast: {{ data.meal_totals.breakfast }} kcal</p>
-                        <p>Lunch: {{ data.meal_totals.lunch }} kcal</p>
-                        <p>Dinner: {{ data.meal_totals.dinner }} kcal</p>
-                        <p>Snacks: {{ data.meal_totals.snack }} kcal</p>
-                        <p><strong>Total Calories:</strong> {{ data.total_calories }} kcal</p>
-                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addFoodModal" data-day="{{ day }}">Add Food</button>
-                        <button class="btn btn-link btn-sm view-foods" data-day="{{ day }}">View Food Entries</button>
+                        <p>Breakfast:<span id="total_breakfast_{{ day|date:'Ymd' }}"> {{ data.meal_totals.breakfast }}</span> kcal</p>
+                        <p>Lunch: <span id="total_lunch_{{ day|date:'Ymd' }}">{{ data.meal_totals.lunch }}</span> kcal</p>
+                        <p>Dinner: <span id="total_dinner_{{ day|date:'Ymd' }}">{{ data.meal_totals.dinner }}</span> kcal</p>
+                        <p>Snacks: <span id="total_snacks_{{ day|date:'Ymd' }}">{{ data.meal_totals.snack }}</span> kcal</p>
+                        <p><strong>Total Calories:</strong> <span id="total_calories_{{ day|date:'Ymd' }}">{{ data.total_calories }}</span> kcal</p>
+                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addFoodModal" onclick="setDate('{{ day|date:'Y-m-d' }}')">Add Food</button>
+                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#viewFoodsModal" onclick="viewData('{{ day|date:'Y-m-d' }}')">View Food Entries</button>
                     </div>
                 </div>
             </div>
@@ -35,8 +35,7 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="addFoodForm">
-                    {% csrf_token %}
+                <form id="addFoodForm" onsubmit="saveData(event)">
                     <input type="hidden" id="food-date" name="date">
                     <div class="form-group">
                         <label for="food-meal-type">Meal Type</label>
@@ -74,58 +73,89 @@
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_scripts %}
 <script>
-    // Show the add food modal with the selected date
-    $('#addFoodModal').on('show.bs.modal', function (event) {
-        var button = $(event.relatedTarget);  // Button that triggered the modal
-        var day = button.data('day');
-        $('#food-modal-date').text(day);
-        $('#food-date').val(day);  // Set hidden date input
-    });
+    function setDate(date) {
+        document.getElementById("food-date").value = date;
+        document.getElementById("food-modal-date").textContent = date;
+    }
 
-    // Handle form submission with AJAX
-    $('#addFoodForm').on('submit', function (e) {
-        e.preventDefault();
+    // Save food entry and update meal totals
+    function saveData(event) {
+        event.preventDefault();
 
-        $.ajax({
-            type: 'POST',
-            url: '{% url "fitness_app:create_food" %}',  // Use Django URL template tag for food creation view
-            data: $(this).serialize(),
-            success: function (response) {
-                if (response.success) {
-                    $('#addFoodModal').modal('hide');
-                    $('#addFoodForm')[0].reset();
-                    location.reload();  // Reload to update daily totals
-                } else {
-                    alert("An error occurred. Please try again.");
-                }
-            },
-            error: function () {
-                alert("An error occurred. Please try again.");
-            }
+        const date = document.getElementById("food-date").value;
+        const mealType = document.getElementById("food-meal-type").value;
+        const calories = parseInt(document.getElementById("food-calories").value);
+
+        // Retrieve existing food entries from sessionStorage or initialize an empty array
+        let foodEntries = JSON.parse(sessionStorage.getItem("foodEntries")) || {};
+
+        // Initialize the date entry if it doesn't exist
+        if (!foodEntries[date]) {
+            foodEntries[date] = { breakfast: 0, lunch: 0, dinner: 0, snack: 0, entries: [] };
+        }
+
+        // Add the new food entry to the specific meal type
+        foodEntries[date][mealType] += calories;
+
+        // Add entry to the general list for viewing
+        foodEntries[date].entries.push({ mealType, calories });
+
+        // Save the updated food entries back to sessionStorage
+        sessionStorage.setItem("foodEntries", JSON.stringify(foodEntries));
+
+        // Update meal type totals on the page
+        updateMealTotals(date);
+
+        // Close the Add Food modal and reset the form
+        $('#addFoodModal').modal('hide');
+        document.getElementById("addFoodForm").reset();
+    }
+
+    // Update the displayed meal type totals for a specific date
+    function updateMealTotals(date) {
+        const dateId = date.replace(/-/g, '');  // Format the date for use in element IDs
+        const foodEntries = JSON.parse(sessionStorage.getItem("foodEntries")) || {};
+        const dayData = foodEntries[date] || { breakfast: 0, lunch: 0, dinner: 0, snack: 0 };
+
+        // Update the displayed totals for each meal type
+        document.getElementById(`total_breakfast_${dateId}`).textContent = dayData.breakfast || 0;
+        document.getElementById(`total_lunch_${dateId}`).textContent = dayData.lunch || 0;
+        document.getElementById(`total_dinner_${dateId}`).textContent = dayData.dinner || 0;
+        document.getElementById(`total_snacks_${dateId}`).textContent = dayData.snack || 0;
+
+        // Update the total calories for the day
+        const totalCalories = dayData.breakfast + dayData.lunch + dayData.dinner + dayData.snack;
+        document.getElementById(`total_calories_${dateId}`).textContent = totalCalories;
+    }
+
+    // View all food entries for the selected date in the modal
+    function viewData(date) {
+        const foodEntries = JSON.parse(sessionStorage.getItem("foodEntries")) || {};
+        const dayEntries = foodEntries[date]?.entries || [];
+
+        // Get the container element for the food list in the modal
+        const foodListContent = document.getElementById("food-list-content");
+
+        // Clear the previous list
+        foodListContent.innerHTML = "";
+
+        // Populate the modal with each food entry for the selected date
+        dayEntries.forEach((entry, index) => {
+            const foodItem = document.createElement("div");
+            foodItem.classList.add("food-item");
+            foodItem.innerHTML = `
+                <p><strong>Entry ${index + 1}</strong></p>
+                <p><strong>Meal Type:</strong> ${entry.mealType}</p>
+                <p><strong>Calories:</strong> ${entry.calories} kcal</p>
+                <hr>
+            `;
+            foodListContent.appendChild(foodItem);
         });
-    });
 
-    // View food entries for a selected day
-    $('.view-foods').on('click', function () {
-        var day = $(this).data('day');
-        $('#view-food-modal-date').text(day);
-
-        $.ajax({
-            type: 'GET',
-            url: '{% url "fitness_app:view_foods" %}',  // Define this view and URL in your backend
-            data: { 'date': day },
-            success: function (response) {
-                $('#food-list-content').html(response.html);
-                $('#viewFoodsModal').modal('show');
-            },
-            error: function () {
-                alert("Could not load food entries. Please try again.");
-            }
-        });
-    });
+        // Set the date in the view modal header
+        document.getElementById("view-food-modal-date").textContent = date;
+    }
 </script>
-{% endblock %}
+{% endblock content %}

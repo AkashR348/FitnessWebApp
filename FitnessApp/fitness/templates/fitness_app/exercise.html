@@ -12,9 +12,8 @@
                         <h5>{{ day|date:"l" }} - {{ day|date:"M d, Y" }}</h5>
                         <p>Total Time: <span id="total-duration">{{ data.total_time }}</span> minutes</p>
                         <p>Total Calories: <span id="total-calories">{{ data.total_calories }}</span> kcal</p>
-                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addExerciseModal" data-day="{{ day }}">Add Exercise</button>
-                        <button class="btn btn-link btn-sm view-exercises" data-toggle="modal" data-target="#viewExercisesModal" data-day="{{ day }}">View Exercises</button>
-
+                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addExerciseModal" onclick="setDate('{{ day|date:'m-d-Y' }}')">Add Exercise</button>
+                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#viewExercisesModal" onclick="viewData()">View Exercises</button>
                     </div>
                 </div>
             </div>
@@ -33,8 +32,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="addExerciseForm">
-                    {% csrf_token %}
+                <!-- Ensure onsubmit is on the form and there's no action or method attributes -->
+                <form id="addExerciseForm" onsubmit="saveData(event)">
                     <input type="hidden" id="exercise-date" name="date">
                     <div class="form-group">
                         <label for="exercise-name">Exercise Name</label>
@@ -66,75 +65,100 @@
                 </button>
             </div>
             <div class="modal-body" id="exercise-list-content">
-                <!-- Exercise list for the selected day will be dynamically loaded here -->
-                {% if exercise %}
-    <ul class="list-group">
-        {% for exercise in exercise %}
-            <li class="list-group-item">
-                <h5>{{ exercise.name }}</h5>
-                <p>Duration: {{ exercise.duration }} minutes</p>
-                <p>Calories Burned: {{ exercise.calories_burned }} kcal</p>
-                <p>Start Time: {{ exercise.start_time }}</p>
-                <p>Date: {{ exercise.date }}</p>
-            </li>
-        {% endfor %}
-    </ul>
-{% else %}
-    <p>No exercises recorded for this day.</p>
-{% endif %}
-
+                
             </div>
         </div>
     </div>
 </div>
-{% endblock %}
 
-{% block extra_scripts %}
-<!-- jQuery (necessary for AJAX requests) -->
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('addExerciseForm');
+    // Function to set date in the Add Exercise modal
+    function setDate(date) {
+        document.getElementById("exercise-date").value = date;
+        document.getElementById("modal-date").textContent = date;
+    }
 
-        form.addEventListener('submit', function (e) {
-            e.preventDefault();  // Prevent the traditional form submission
-
-            const formData = new FormData(form);
-
-            fetch('{% url "fitness_app:create_exercise" %}', {
-                method: 'POST',
-                headers: {
-                    'X-CSRFToken': '{{ csrf_token }}',  // Add CSRF token if required
-                },
-                body: formData,
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Close modal, reset form, and update the exercise list
-                    $('#addExerciseModal').modal('hide');
-                    form.reset();
-
-                    const exerciseHtml = `
-                        <li class="list-group-item">
-                            <h5>${data.exercise.name}</h5>
-                            <p>Duration: ${data.exercise.duration} minutes</p>
-                            <p>Calories Burned: ${data.exercise.calories_burned} kcal</p>
-                            <p>Start Time: ${data.exercise.start_time}</p>
-                            <p>Date: ${data.exercise.date}</p>
-                        </li>
-                    `;
-                    document.getElementById('exercise-list-content').insertAdjacentHTML('beforeend', exerciseHtml);
-                } else {
-                    alert("An error occurred: " + JSON.stringify(data.errors));
-                }
-            })
-            .catch(error => {
-                console.error("Fetch error:", error);
-                alert("An error occurred. Please try again.");
-            });
+    // Save data to session storage and prevent form submission
+    function saveData(event) {
+        event.preventDefault();  // Prevent the default form submission behavior
+    
+        // Retrieve the exercise details from form inputs
+        const date = document.getElementById("exercise-date").value;
+        const name = document.getElementById("exercise-name").value;
+        const duration = parseInt(document.getElementById("exercise-duration").value);
+        const calories_burned = parseInt(document.getElementById("exercise-calories").value);
+    
+        // Create an exercise object
+        const exercise = { date, name, duration, calories_burned };
+    
+        // Retrieve existing exercises from sessionStorage or initialize an empty array
+        let exercises = JSON.parse(sessionStorage.getItem("exercises")) || [];
+    
+        // Add the new exercise to the array
+        exercises.push(exercise);
+    
+        // Save the updated exercises array back to sessionStorage
+        sessionStorage.setItem("exercises", JSON.stringify(exercises));
+    
+        // Update the total duration and calories burned for the day
+        updateTotals();
+    
+        // Close the Add Exercise modal and reset the form
+        $('#addExerciseModal').modal('hide');
+        document.getElementById("addExerciseForm").reset();
+    }
+    
+    function updateTotals() {
+        // Retrieve all exercises from sessionStorage
+        const exercises = JSON.parse(sessionStorage.getItem("exercises")) || [];
+    
+        // Initialize total counters
+        let totalDuration = 0;
+        let totalCalories = 0;
+    
+        // Calculate the totals for the current day
+        exercises.forEach(exercise => {
+            totalDuration += exercise.duration;
+            totalCalories += exercise.calories_burned;
         });
-    });
+    
+        // Update the HTML with the new totals
+        document.getElementById("total-duration").textContent = totalDuration;
+        document.getElementById("total-calories").textContent = totalCalories;
+    }
+    
+    function viewData() {
+        // Retrieve exercises from sessionStorage
+        const exercises = JSON.parse(sessionStorage.getItem("exercises")) || [];
+    
+        // Get the container element for the exercise list in the modal
+        const exerciseListContent = document.getElementById("exercise-list-content");
+    
+        // Clear the previous exercise list
+        exerciseListContent.innerHTML = "";
+    
+        // Populate the modal with each exercise
+        exercises.forEach((exercise, index) => {
+            const exerciseItem = document.createElement("div");
+            exerciseItem.classList.add("exercise-item");
+            exerciseItem.innerHTML = `
+                <p><strong>Exercise ${index + 1}</strong></p>
+                <p><strong>Date:</strong> ${exercise.date}</p>
+                <p><strong>Name:</strong> ${exercise.name}</p>
+                <p><strong>Duration:</strong> ${exercise.duration} minutes</p>
+                <p><strong>Calories Burned:</strong> ${exercise.calories_burned} kcal</p>
+                <hr>
+            `;
+            exerciseListContent.appendChild(exerciseItem);
+        });
+    }
+    
+    
+
+
 </script>
-{% endblock%}
+
+{% endblock content %}
+

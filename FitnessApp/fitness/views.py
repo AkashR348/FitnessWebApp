@@ -158,8 +158,8 @@ def change_password(request):
         if form.is_valid():
             user = form.save()
             update_session_auth_hash(request, user)  #Don't log user out
-            messages.success(request, 'Your password was successfully updated!')
-            return redirect('change_password')
+            #messages.success(request, 'Your password was successfully updated!')
+            return redirect('/')
     else:
         form = PasswordChangeForm(request.user)
     return render(request, 'fitness_app/change_password.html', {

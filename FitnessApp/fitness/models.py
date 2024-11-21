@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from datetime import timedelta
+from datetime import datetime, timedelta
 
 class Exercise(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
@@ -43,7 +43,4 @@ class WeeklySummary(models.Model):
 
     def __str__(self):
         return f"Week of {self.week_start_date} Summary for {self.user.username}"
-
-
-
 
