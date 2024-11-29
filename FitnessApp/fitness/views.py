@@ -1,11 +1,14 @@
+import calendar
 from datetime import datetime, timedelta
+from time import timezone
 
 from django.contrib.auth.forms import PasswordChangeForm
+from django.http import JsonResponse, HttpResponse
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Exercise, FoodEntry
 from django.contrib.auth import login
-from .forms import SignUpForm
+from .forms import SignUpForm, ExerciseForm
 from .models import UserProfile, Exercise, FoodEntry
 from .forms import GoalForm
 from django.contrib.auth import login, update_session_auth_hash
@@ -180,3 +183,25 @@ def change_password(request):
     return render(request, 'fitness_app/change_password.html', {
         'form': form
     })
+
+def create_exercise(request):
+    if request.method == 'POST':
+        date = datetime.strptime(request.POST["date"],"%m-%d-%Y")
+        day = calendar.weekday(date.year,date.month,date.day)
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        Exercise.objects.create(user = request.user, date= request.POST["date"] , day= days[day] ,name=request.POST["name"],
+                                duration=request.POST["duration"],
+                                calories_burned=request.POST["calories_burned"])
+        #return HttpResponse(status=201)
+    return render(request, 'fitness_app/exercise.html')
+
+def create_foodentry(request):
+    if request.method == 'POST':
+        date = datetime.strptime(request.POST["date"],"%Y-%m-%d")
+        day = calendar.weekday(date.year,date.month,date.day)
+        days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
+        FoodEntry.objects.create(user = request.user, date= request.POST["date"] , day= days[day],
+                                meal_type=request.POST["meal_type"],
+                                calories=request.POST["calories"])
+        #return HttpResponse(status=201)
+    return render(request, 'fitness_app/food.html')
