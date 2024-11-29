@@ -33,7 +33,9 @@
             </div>
             <div class="modal-body">
                 <!-- Ensure onsubmit is on the form and there's no action or method attributes -->
-                <form id="addExerciseForm" onsubmit="saveData(event)">
+<!--                onsubmit="saveData(event)"-->
+                <form id="addExerciseForm"  action="{% url 'fitness_app:create_exercise' %}" method="post">
+                    {% csrf_token %}
                     <input type="hidden" id="exercise-date" name="date">
                     <div class="form-group">
                         <label for="exercise-name">Exercise Name</label>

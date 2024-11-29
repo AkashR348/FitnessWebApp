@@ -9,10 +9,10 @@ class ExerciseAdmin(admin.ModelAdmin):
     (None, {"fields": ["user"]}),
     (None, {"fields": ["day"]}),
     (None,{"fields": ["name"]}),
-    (None, {"fields": ["date"]}),
+    #(None, {"fields": ["date"]}),
     (None, {"fields": ["duration"]}),
     (None, {"fields": ["calories_burned"]}),
-    (None, {"fields": ["total_time"]}),
+    #(None, {"fields": ["total_time"]}),
 
 ]
 
@@ -39,13 +39,13 @@ class WeeklySummaryAdmin(admin.ModelAdmin):
     
         
     
-Sunday = [FoodEntryAdmin, ExerciseAdmin]
-Monday = [FoodEntryAdmin, ExerciseAdmin]
-Tuesday = [FoodEntryAdmin, ExerciseAdmin]
-Wednesday = [FoodEntryAdmin, ExerciseAdmin]
-Thursday = [FoodEntryAdmin, ExerciseAdmin]
-Friday = [FoodEntryAdmin, ExerciseAdmin]
-Saturday = [FoodEntryAdmin, ExerciseAdmin]
+    Sunday = [FoodEntryAdmin, ExerciseAdmin]
+    Monday = [FoodEntryAdmin, ExerciseAdmin]
+    Tuesday = [FoodEntryAdmin, ExerciseAdmin]
+    Wednesday = [FoodEntryAdmin, ExerciseAdmin]
+    Thursday = [FoodEntryAdmin, ExerciseAdmin]
+    Friday = [FoodEntryAdmin, ExerciseAdmin]
+    Saturday = [FoodEntryAdmin, ExerciseAdmin]
 
 admin.site.register(FoodEntry, FoodEntryAdmin)
 admin.site.register(Exercise, ExerciseAdmin)
