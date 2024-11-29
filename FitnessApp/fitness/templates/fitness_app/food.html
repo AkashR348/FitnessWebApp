@@ -36,7 +36,9 @@
                 </button>
             </div>
             <div class="modal-body">
-                <form id="addFoodForm" onsubmit="saveData(event)">
+<!--                onsubmit="saveData(event)"-->
+                <form id="addFoodForm" action="{% url 'fitness_app:create_foodentry' %}" method="post">
+                    {% csrf_token %}
                     <input type="hidden" id="food-date" name="date">
                     <div class="form-group">
                         <label for="food-meal-type">Meal Type</label>

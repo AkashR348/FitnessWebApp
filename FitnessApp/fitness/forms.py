@@ -8,7 +8,7 @@ from .models import UserProfile
 class ExerciseForm(forms.ModelForm):
     class Meta:
         model = Exercise
-        fields = ['day', 'name', 'duration', 'calories_burned', 'date']
+        fields = ['day', 'name', 'duration', 'calories_burned']
 
 class FoodEntryForm(forms.ModelForm):
     class Meta:

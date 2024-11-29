@@ -8,15 +8,16 @@ class Exercise(models.Model):
     name = models.CharField(max_length=100)  # Exercise name (e.g., "Running")
     duration = models.PositiveIntegerField()  # Duration in minutes
     calories_burned = models.PositiveIntegerField()  # Calories burned
-    date = models.DateField()  # Automatically stores the date when the entry was created
-    total_time = models.PositiveIntegerField(default=0)  # Total time spent exercising (in minutes)
+    #date = models.DateField()  # Automatically stores the date when the entry was created
+    date = models.DateTimeField(auto_now=True, editable=False)
+    #total_time = models.PositiveIntegerField(default=0)  # Total time spent exercising (in minutes)
 
-    def save(self, *args, **kwargs):
-        # Automatically calculate end time based on start time and duration
-        if self.start_time:
-            end_time = (datetime.combine(datetime.today(), self.start_time) + timedelta(minutes=self.duration)).time()
-            self.end_time = end_time
-        super(Exercise, self).save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # Automatically calculate end time based on start time and duration
+    #     if self.start_time:
+    #         end_time = (datetime.combine(datetime.today(), self.start_time) + timedelta(minutes=self.duration)).time()
+    #         self.end_time = end_time
+    #     super(Exercise, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.day} - {self.name} ({self.calories_burned} kcal)"
