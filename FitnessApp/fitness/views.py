@@ -3,7 +3,8 @@ from datetime import datetime, timedelta
 from time import timezone
 
 from django.contrib.auth.forms import PasswordChangeForm
-from django.http import JsonResponse, HttpResponse
+from django.db.models import OneToOneField, SET_NULL
+from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Exercise, FoodEntry
@@ -189,19 +190,31 @@ def create_exercise(request):
         date = datetime.strptime(request.POST["date"],"%m-%d-%Y")
         day = calendar.weekday(date.year,date.month,date.day)
         days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        Exercise.objects.create(user = request.user, date= request.POST["date"] , day= days[day] ,name=request.POST["name"],
+        Exercise.objects.create(user = request.user,
+                                date= request.POST["date"] ,
+                                day= days[day],
+                                name=request.POST["name"],
                                 duration=request.POST["duration"],
                                 calories_burned=request.POST["calories_burned"])
-        #return HttpResponse(status=201)
-    return render(request, 'fitness_app/exercise.html')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
 
 def create_foodentry(request):
     if request.method == 'POST':
         date = datetime.strptime(request.POST["date"],"%Y-%m-%d")
         day = calendar.weekday(date.year,date.month,date.day)
         days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
-        FoodEntry.objects.create(user = request.user, date= request.POST["date"] , day= days[day],
+        FoodEntry.objects.create(user = request.user,
+                                date= request.POST["date"],
+                                day= days[day],
                                 meal_type=request.POST["meal_type"],
                                 calories=request.POST["calories"])
-        #return HttpResponse(status=201)
-    return render(request, 'fitness_app/food.html')
+    return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
+
+
+# def create_goal(request):
+#     if request.method == 'POST':
+#         UserProfile.objects.create(user = OneToOneField(request.user,on_delete=SET_NULL),
+#                                    goal_calories_burned = request.POST["goal_calories_burned"],
+#                                    goal_calories_eaten = request.POST["goal_calories_eaten"],
+#                                    goal_workout_duration = request.POST["goal_workout_duration"])
+#         return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
