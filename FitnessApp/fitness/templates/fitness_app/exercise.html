@@ -33,9 +33,8 @@
             </div>
             <div class="modal-body">
                 <!-- Ensure onsubmit is on the form and there's no action or method attributes -->
-<!--                onsubmit="saveData(event)"-->
-                <form id="addExerciseForm" >
-                    {% csrf_token %} 
+                <form id="addExerciseForm"  action="{% url 'fitness_app:create_exercise' %}" method="post">
+                    {% csrf_token %}
                     <input type="hidden" id="exercise-date" name="date">
                     <div class="form-group">
                         <label for="exercise-name">Exercise Name</label>
@@ -49,7 +48,7 @@
                         <label for="exercise-calories">Calories Burned</label>
                         <input type="number" class="form-control" id="exercise-calories" name="calories_burned" required>
                     </div>
-                    <button type="submit" class="btn btn-primary" onclick="saveData(event)">Save Exercise</button>
+                    <button id="save_button" type="submit" class="btn btn-primary">Save Exercise</button>
                 </form>
             </div>
         </div>
@@ -77,6 +76,10 @@
 
 <script>
     // Function to set date in the Add Exercise modal
+
+    var button = document.getElementById('save_button');
+    button.addEventListener('click',saveData(event),false);
+
     function setDate(date) {
         document.getElementById("exercise-date").value = date;
         document.getElementById("modal-date").textContent = date;

@@ -1,3 +1,5 @@
+from email.policy import default
+
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import datetime, timedelta
@@ -8,16 +10,7 @@ class Exercise(models.Model):
     name = models.CharField(max_length=100)  # Exercise name (e.g., "Running")
     duration = models.PositiveIntegerField()  # Duration in minutes
     calories_burned = models.PositiveIntegerField()  # Calories burned
-    #date = models.DateField()  # Automatically stores the date when the entry was created
     date = models.DateTimeField(auto_now=True, editable=False)
-    #total_time = models.PositiveIntegerField(default=0)  # Total time spent exercising (in minutes)
-
-    # def save(self, *args, **kwargs):
-    #     # Automatically calculate end time based on start time and duration
-    #     if self.start_time:
-    #         end_time = (datetime.combine(datetime.today(), self.start_time) + timedelta(minutes=self.duration)).time()
-    #         self.end_time = end_time
-    #     super(Exercise, self).save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.day} - {self.name} ({self.calories_burned} kcal)"
@@ -46,6 +39,16 @@ class WeeklySummary(models.Model):
 
 class UserProfile(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
+    #user = models.ForeignKey(User, on_delete=models.CASCADE)
     goal_calories_burned = models.IntegerField(default=2000)  # Set default goals
     goal_calories_eaten = models.IntegerField(default=15000)
+<<<<<<< HEAD
     goal_workout_duration = models.IntegerField(default=300)  # in minutes
+=======
+    goal_workout_duration = models.IntegerField(default=300)  # in minutes
+
+    def __str__(self):
+        return (f"Goal for {self.user.username}"
+                f"Calories burned goal: {self.goal_calories_burned}"
+                f"Calories eaten goal: {self.goal_calories_eaten}")
+>>>>>>> b0ad9d691fb16cfbba33d81e33156e580e2b4083

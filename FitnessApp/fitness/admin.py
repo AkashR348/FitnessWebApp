@@ -1,6 +1,7 @@
 
 from django.contrib import admin
-from .models import Exercise, FoodEntry, WeeklySummary
+from .models import Exercise, FoodEntry, WeeklySummary, UserProfile
+
 
 # Register your models here.
 
@@ -36,9 +37,7 @@ class WeeklySummaryAdmin(admin.ModelAdmin):
         (None, {"fields": ["total_calories_eaten"]}),
         
     ]
-    
-        
-    
+
     Sunday = [FoodEntryAdmin, ExerciseAdmin]
     Monday = [FoodEntryAdmin, ExerciseAdmin]
     Tuesday = [FoodEntryAdmin, ExerciseAdmin]
@@ -47,6 +46,16 @@ class WeeklySummaryAdmin(admin.ModelAdmin):
     Friday = [FoodEntryAdmin, ExerciseAdmin]
     Saturday = [FoodEntryAdmin, ExerciseAdmin]
 
+class UserProfileAdmin(admin.ModelAdmin):
+    fieldsets = [
+        (None, {"fields": ["user"]}),
+        (None, {"fields": ["goal_calories_burned"]}),
+        (None, {"fields": ["goal_calories_eaten"]}),
+        (None, {"fields": ["goal_workout_duration"]}),
+    ]
+
+
 admin.site.register(FoodEntry, FoodEntryAdmin)
 admin.site.register(Exercise, ExerciseAdmin)
 admin.site.register(WeeklySummary, WeeklySummaryAdmin)
+admin.site.register(UserProfile, UserProfileAdmin)

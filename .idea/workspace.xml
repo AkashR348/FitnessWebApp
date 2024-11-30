@@ -8,10 +8,10 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FitnessApp/db.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/FitnessApp/db.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FitnessApp/fitness/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/FitnessApp/fitness/admin.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FitnessApp/fitness/forms.py" beforeDir="false" afterPath="$PROJECT_DIR$/FitnessApp/fitness/forms.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FitnessApp/fitness/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/FitnessApp/fitness/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FitnessApp/fitness/templates/fitness_app/exercise.html" beforeDir="false" afterPath="$PROJECT_DIR$/FitnessApp/fitness/templates/fitness_app/exercise.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FitnessApp/fitness/templates/fitness_app/food.html" beforeDir="false" afterPath="$PROJECT_DIR$/FitnessApp/fitness/templates/fitness_app/food.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FitnessApp/fitness/templates/fitness_app/summary.html" beforeDir="false" afterPath="$PROJECT_DIR$/FitnessApp/fitness/templates/fitness_app/summary.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FitnessApp/fitness/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/FitnessApp/fitness/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/FitnessApp/fitness/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/FitnessApp/fitness/views.py" afterDir="false" />
     </list>
