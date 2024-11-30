@@ -49,4 +49,3 @@ class UserProfile(models.Model):
     goal_calories_burned = models.IntegerField(default=2000)  # Set default goals
     goal_calories_eaten = models.IntegerField(default=15000)
     goal_workout_duration = models.IntegerField(default=300)  # in minutes
-
