@@ -36,7 +36,6 @@
                 </button>
             </div>
             <div class="modal-body">
-<!--                onsubmit="saveData(event)"-->
                 <form id="addFoodForm" action="{% url 'fitness_app:create_foodentry' %}" method="post">
                     {% csrf_token %}
                     <input type="hidden" id="food-date" name="date">
@@ -53,7 +52,7 @@
                         <label for="food-calories">Calories</label>
                         <input type="number" class="form-control" id="food-calories" name="calories" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Save Food Entry</button>
+                    <button id="save_button" type="submit" class="btn btn-primary">Save Food Entry</button>
                 </form>
             </div>
         </div>
@@ -78,6 +77,11 @@
 </div>
 
 <script>
+    var button = document.getElementById('save_button');
+    button.addEventListener('click',saveData(event),false);
+
+
+
     function setDate(date) {
         document.getElementById("food-date").value = date;
         document.getElementById("food-modal-date").textContent = date;
