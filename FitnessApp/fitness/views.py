@@ -232,6 +232,8 @@ def fetch_food(request):
         except (ValueError, TypeError):
             return JsonResponse({'food_entries': []})
     return HttpResponseBadRequest('Invalid request method')
+
+
 #     if request.method == 'POST':
 #         UserProfile.objects.create(user = OneToOneField(request.user,on_delete=SET_NULL),
 #                                    goal_calories_burned = request.POST["goal_calories_burned"],
