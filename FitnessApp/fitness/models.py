@@ -42,13 +42,9 @@ class UserProfile(models.Model):
     #user = models.ForeignKey(User, on_delete=models.CASCADE)
     goal_calories_burned = models.IntegerField(default=2000)  # Set default goals
     goal_calories_eaten = models.IntegerField(default=15000)
-<<<<<<< HEAD
-    goal_workout_duration = models.IntegerField(default=300)  # in minutes
-=======
     goal_workout_duration = models.IntegerField(default=300)  # in minutes
 
     def __str__(self):
         return (f"Goal for {self.user.username}"
                 f"Calories burned goal: {self.goal_calories_burned}"
                 f"Calories eaten goal: {self.goal_calories_eaten}")
->>>>>>> b0ad9d691fb16cfbba33d81e33156e580e2b4083
