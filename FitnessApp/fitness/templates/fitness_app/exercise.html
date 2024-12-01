@@ -12,8 +12,8 @@
                         <h5>{{ day|date:"l" }} - {{ day|date:"M d, Y" }}</h5>
                         <p>Total Time: <span id="total-duration">{{ data.total_time }}</span> minutes</p>
                         <p>Total Calories: <span id="total-calories">{{ data.total_calories }}</span> kcal</p>
-                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addExerciseModal" onclick="setDate('{{ day|date:'m-d-Y' }}')">Add Exercise</button>
-                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#viewExercisesModal" onclick="viewData('{{ day|date:'m-d-Y' }}')">View Exercises</button>
+                        <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#addExerciseModal" onclick="setDate('{{ day|date:'Y-m-d' }}')">Add Exercise</button>
+                <button class="btn btn-primary btn-sm" data-toggle="modal" data-target="#viewExercisesModal" onclick="viewData('{{ day|date:'Y-m-d' }}')">View Exercises</button>
                     </div>
                 </div>
             </div>
@@ -75,93 +75,79 @@
 
 
 <script>
-    // Function to set date in the Add Exercise modal
-
-    var button = document.getElementById('save_button');
-    button.addEventListener('click',saveData(event),false);
-
-    function setDate(date) {
-        document.getElementById("exercise-date").value = date;
-        document.getElementById("modal-date").textContent = date;
-    }
-
-    // Save data to session storage and prevent form submission
-    function saveData(event) {
-        event.preventDefault();  // Prevent the default form submission behavior
+        // Set the date in the Add Exercise Modal
+        function setDate(date) {
+            console.log("Setting date:", date);
+            document.getElementById('modal-date').innerText = date;
+            document.getElementById('exercise-date').value = date;
+        }
     
-        // Retrieve the exercise details from form inputs
-        const date = document.getElementById("exercise-date").value;
-        const name = document.getElementById("exercise-name").value;
-        const duration = parseInt(document.getElementById("exercise-duration").value);
-        const calories_burned = parseInt(document.getElementById("exercise-calories").value);
-    
-        // Create an exercise object
-        const exercise = { date, name, duration, calories_burned };
-    
-        // Retrieve existing exercises from sessionStorage or initialize an empty array
-        let exercises = JSON.parse(sessionStorage.getItem("exercises")) || [];
-    
-        // Add the new exercise to the array
-        exercises.push(exercise);
-    
-        // Save the updated exercises array back to sessionStorage
-        sessionStorage.setItem("exercises", JSON.stringify(exercises));
-    
-        // Update the total duration and calories burned for the day
-        updateTotals();
-    
-        // Close the Add Exercise modal and reset the form
-        $('#addExerciseModal').modal('hide');
-        document.getElementById("addExerciseForm").reset();
-    }
-    
-    function updateTotals() {
-        // Retrieve all exercises from sessionStorage
-        const exercises = JSON.parse(sessionStorage.getItem("exercises")) || [];
-    
-        // Initialize total counters
-        let totalDuration = 0;
-        let totalCalories = 0;
-    
-        // Calculate the totals for the current day
-        exercises.forEach(exercise => {
-            totalDuration += exercise.duration;
-            totalCalories += exercise.calories_burned;
+        // Handle Add Exercise form submission
+        $('#addExerciseForm').on('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
+            if (!$('#exercise-date').val()) {
+                alert('Date is required. Please try again.');
+                return;
+            }
+            const formData = $(this).serialize(); // Serialize form data
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                success: function (response) {
+                    // Refresh totals dynamically
+                    alert('Exercise added successfully!');
+                    location.reload(); // Reload to update totals
+                },
+                error: function () {
+                    alert('Failed to add exercise. Please try again.');
+                }
+            });
         });
     
-        // Update the HTML with the new totals
-        document.getElementById("total-duration").textContent = totalDuration;
-        document.getElementById("total-calories").textContent = totalCalories;
-    }
-    
-    function viewData(date) {
-        // Retrieve exercises from sessionStorage
-        const exercises = JSON.parse(sessionStorage.getItem("exercises")) || [];
-    
-        // Get the container element for the exercise list in the modal
-        const exerciseListContent = document.getElementById("exercise-list-content");
-    
-        // Clear the previous exercise list
-        exerciseListContent.innerHTML = "";
-    
-        // Populate the modal with each exercise
-        exercises.forEach((exercise, index) => {
-            const exerciseItem = document.createElement("div");
-            exerciseItem.classList.add("exercise-item");
-            exerciseItem.innerHTML = `
-                <p><strong>Exercise ${index + 1}</strong></p>
-                <p><strong>Date:</strong> ${exercise.date}</p>
-                <p><strong>Name:</strong> ${exercise.name}</p>
-                <p><strong>Duration:</strong> ${exercise.duration} minutes</p>
-                <p><strong>Calories Burned:</strong> ${exercise.calories_burned} kcal</p>
-                <hr>
-            `;
-            exerciseListContent.appendChild(exerciseItem);
-        });
-
-        document.getElementById("view-modal-date").textContent = date;
-
-    }
+        // Fetch and display exercises in the View Exercises Modal
+        function viewData(date) {
+            // Set the selected date in the modal header
+            document.getElementById('view-modal-date').innerText = date;
+        
+            // Clear the content and show a loading message
+            document.getElementById('exercise-list-content').innerHTML = '<p>Loading...</p>';
+        
+            // Fetch exercises from the server
+            $.ajax({
+                url: "{% url 'fitness_app:fetch_exercise' %}" + `?date=${date}`, // Backend endpoint with the date query parameter
+                type: 'GET',
+                success: function (response) {
+                    // Check if there are any exercises for the selected date
+                    if (response.exercises.length === 0) {
+                        document.getElementById('exercise-list-content').innerHTML = '<p>No exercises found for this date.</p>';
+                        return;
+                    }
+        
+                    // Create a table to display the exercise data
+                    let html = '<table class="table table-striped">';
+                    html += '<thead><tr><th>Name</th><th>Date</th><th>Calories Burned</th><th>Duration (min)</th></tr></thead><tbody>';
+                    response.exercises.forEach(exercise => {
+                        html += `<tr>
+                                    <td>${exercise.name}</td>
+                                    <td>${exercise.date}</td>
+                                    <td>${exercise.calories_burned}</td>
+                                    <td>${exercise.duration}</td>
+                                </tr>`;
+                    });
+                    html += '</tbody></table>';
+        
+                    // Update the modal content with the generated table
+                    document.getElementById('exercise-list-content').innerHTML = html;
+                },
+                error: function () {
+                    // Handle errors by displaying a message
+                    document.getElementById('exercise-list-content').innerHTML = '<p>Failed to load exercises. Please try again later.</p>';
+                }
+            });
+        }
+        
+        
     
     
 

@@ -13,6 +13,8 @@ urlpatterns = [
     path('accounts/change_password/', views.change_password, name='change_password'),
     path('create_exercise', views.create_exercise, name='create_exercise'),
     path('create_foodentry', views.create_foodentry, name='create_foodentry'),
-    #path('create_goal', views.create_goal, name='create_goal')
+    path('fetch_exercise', views.fetch_exercise, name='fetch_exercise'),  # Updated to match the method name
+    path('fetch_food', views.fetch_food, name='fetch_food'),  # Add the new URL pattern
 
+    #path('create_goal', views.create_goal, name='create_goal')
 ]
