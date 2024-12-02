@@ -1,10 +1,9 @@
 import calendar
 from datetime import datetime, timedelta
 from time import timezone
-
 from django.contrib.auth.forms import PasswordChangeForm
 from django.db.models import OneToOneField, SET_NULL
-from django.http import JsonResponse, HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseBadRequest, JsonResponse, HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from .models import Exercise, FoodEntry
@@ -13,12 +12,7 @@ from .forms import SignUpForm, ExerciseForm
 from .models import UserProfile, Exercise, FoodEntry
 from .forms import GoalForm
 from django.contrib.auth import login, update_session_auth_hash
-
-
-
-
-
-
+import logging
 
 
 # Publicly accessible 
@@ -95,10 +89,6 @@ def food_page(request):
 
     return render(request, 'fitness_app/food.html', { 'week_food_data':week_food_data})
 
-
-
-
-
 def signup(request):
     if request.method == 'POST':
         form = SignUpForm(request.POST)
@@ -109,14 +99,6 @@ def signup(request):
     else:
         form = SignUpForm()
     return render(request, 'fitness_app/signup.html', {'form': form})
-
-
-
-
-
-
-
-
 
 @login_required
 def summary_view(request):
@@ -164,8 +146,6 @@ def summary_view(request):
     }
     return render(request, 'fitness_app/summary.html', context)
 
-
-
 @login_required
 def profile(request):
     return render(request, 'fitness_app/profile.html')
@@ -187,11 +167,12 @@ def change_password(request):
 
 def create_exercise(request):
     if request.method == 'POST':
-        date = datetime.strptime(request.POST["date"],"%m-%d-%Y")
+        print(f"Received date in create_exercise: {request.POST['date']}")
+        date = datetime.strptime(request.POST["date"],"%Y-%m-%d")
         day = calendar.weekday(date.year,date.month,date.day)
         days = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
         Exercise.objects.create(user = request.user,
-                                date= request.POST["date"] ,
+                                date= date.date(),
                                 day= days[day],
                                 name=request.POST["name"],
                                 duration=request.POST["duration"],
@@ -210,8 +191,49 @@ def create_foodentry(request):
                                 calories=request.POST["calories"])
     return HttpResponseRedirect(request.META.get('HTTP_REFERER','/'))
 
+@login_required
+def fetch_exercise(request):
+    if request.method == 'GET':
+        date_str = request.GET.get('date')
+        print(f"Received date in fetch_exercise: {date_str}")
+        try:
+            date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            exercises = Exercise.objects.filter(user=request.user, date=date)
+            data = []
+            for exercise in exercises:
+                data.append({
+                    'name': exercise.name,
+                    'duration': exercise.duration,
+                    'date': exercise.date,
+                    'calories_burned': exercise.calories_burned
+                })
+            return JsonResponse({'exercises': data})
+        except (ValueError, TypeError):
+            return JsonResponse({'exercises': []})
+    return HttpResponseBadRequest('Invalid request method')
 
-# def create_goal(request):
+@login_required
+def fetch_food(request):
+    if request.method == 'GET':
+        date_str = request.GET.get('date')
+        print(f"Received date in fetch_food: {date_str}")
+        try:
+            date = datetime.strptime(date_str, "%Y-%m-%d").date()
+            food_entries = FoodEntry.objects.filter(user=request.user, date=date)
+            data = []
+            for entry in food_entries:
+                data.append({
+                    'name': entry.name,
+                    'calories': entry.calories,
+                    'date': entry.date,
+                    'meal_type': entry.meal_type
+                })
+            return JsonResponse({'food_entries': data})
+        except (ValueError, TypeError):
+            return JsonResponse({'food_entries': []})
+    return HttpResponseBadRequest('Invalid request method')
+
+
 #     if request.method == 'POST':
 #         UserProfile.objects.create(user = OneToOneField(request.user,on_delete=SET_NULL),
 #                                    goal_calories_burned = request.POST["goal_calories_burned"],

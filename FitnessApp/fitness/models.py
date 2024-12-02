@@ -10,7 +10,7 @@ class Exercise(models.Model):
     name = models.CharField(max_length=100)  # Exercise name (e.g., "Running")
     duration = models.PositiveIntegerField()  # Duration in minutes
     calories_burned = models.PositiveIntegerField()  # Calories burned
-    date = models.DateTimeField(auto_now=True, editable=False)
+    date = models.DateField()
 
     def __str__(self):
         return f"{self.day} - {self.name} ({self.calories_burned} kcal)"

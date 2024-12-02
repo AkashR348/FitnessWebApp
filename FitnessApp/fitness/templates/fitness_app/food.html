@@ -1,4 +1,3 @@
-
 {% extends "base.html" %}
 
 {% block content %}
@@ -52,7 +51,7 @@
                         <label for="food-calories">Calories</label>
                         <input type="number" class="form-control" id="food-calories" name="calories" required>
                     </div>
-                    <button id="save_button" type="submit" class="btn btn-primary">Save Food Entry</button>
+                    <button type="submit" class="btn btn-primary">Save Food Entry</button>
                 </form>
             </div>
         </div>
@@ -77,88 +76,62 @@
 </div>
 
 <script>
-    var button = document.getElementById('save_button');
-    button.addEventListener('click',saveData(event),false);
-
-
-
+    // Set the date in the Add Food Modal
     function setDate(date) {
         document.getElementById("food-date").value = date;
         document.getElementById("food-modal-date").textContent = date;
     }
 
-    // Save food entry and update meal totals
-    function saveData(event) {
-        event.preventDefault();
-
-        const date = document.getElementById("food-date").value;
-        const mealType = document.getElementById("food-meal-type").value;
-        const calories = parseInt(document.getElementById("food-calories").value);
-
-        // Retrieve existing food entries from sessionStorage or initialize an empty array
-        let foodEntries = JSON.parse(sessionStorage.getItem("foodEntries")) || {};
-
-        // Initialize the date entry if it doesn't exist
-        if (!foodEntries[date]) {
-            foodEntries[date] = { breakfast: 0, lunch: 0, dinner: 0, snack: 0, entries: [] };
-        }
-
-        // Add the new food entry to the specific meal type
-        foodEntries[date][mealType] += calories;
-
-        // Add entry to the general list for viewing
-        foodEntries[date].entries.push({ mealType, calories });
-
-        // Save the updated food entries back to sessionStorage
-        sessionStorage.setItem("foodEntries", JSON.stringify(foodEntries));
-
-        // Update meal type totals on the page
-        updateMealTotals(date);
-
-        // Close the Add Food modal and reset the form
-        $('#addFoodModal').modal('hide');
-        document.getElementById("addFoodForm").reset();
-    }
-
-    // Update the displayed meal type totals for a specific date
-    function updateMealTotals(date) {
-        const dateId = date.replace(/-/g, '');  // Format the date for use in element IDs
-        const foodEntries = JSON.parse(sessionStorage.getItem("foodEntries")) || {};
-        const dayData = foodEntries[date] || { breakfast: 0, lunch: 0, dinner: 0, snack: 0 };
-
-        // Update the displayed totals for each meal type
-        document.getElementById(`total_breakfast_${dateId}`).textContent = dayData.breakfast || 0;
-        document.getElementById(`total_lunch_${dateId}`).textContent = dayData.lunch || 0;
-        document.getElementById(`total_dinner_${dateId}`).textContent = dayData.dinner || 0;
-        document.getElementById(`total_snacks_${dateId}`).textContent = dayData.snack || 0;
-
-        // Update the total calories for the day
-        const totalCalories = dayData.breakfast + dayData.lunch + dayData.dinner + dayData.snack;
-        document.getElementById(`total_calories_${dateId}`).textContent = totalCalories;
-    }
+    // Handle Add Food form submission
+    $('#addFoodForm').on('submit', function (e) {
+        e.preventDefault(); // Prevent default form submission
+        const formData = $(this).serialize(); // Serialize form data
+        $.ajax({
+            url: $(this).attr('action'),
+            type: 'POST',
+            data: formData,
+            success: function (response) {
+                alert('Food entry added successfully!');
+                location.reload(); // Reload to update totals
+            },
+            error: function () {
+                alert('Failed to add food entry. Please try again.');
+            }
+        });
+    });
 
     // View all food entries for the selected date in the modal
     function viewData(date) {
-        const foodEntries = JSON.parse(sessionStorage.getItem("foodEntries")) || {};
-        const dayEntries = foodEntries[date]?.entries || [];
-
-        // Get the container element for the food list in the modal
         const foodListContent = document.getElementById("food-list-content");
+        foodListContent.innerHTML = '<p>Loading...</p>'; // Show loading message
 
-        // Clear the previous list
-        foodListContent.innerHTML = "";
+        $.ajax({
+            url: "{% url 'fitness_app:fetch_food' %}" + `?date=${date}`, // Backend endpoint with the date query parameter
+            type: 'GET',
+            success: function (response) {
+                // Check if there are any food entries for the selected date
+                if (response.food_entries.length === 0) {
+                    foodListContent.innerHTML = '<p>No food entries found for this date.</p>';
+                    return;
+                }
 
-        // Populate the modal with each food entry for the selected date
-        dayEntries.forEach((entry, index) => {
-            const foodItem = document.createElement("div");
-            foodItem.classList.add("food-item");
-            foodItem.innerHTML = `
-                <p><strong>Entry ${index + 1}</strong></p>
-                <p><strong>Meal Type:</strong> ${entry.mealType}</p>
-                <p><strong>Calories:</strong> ${entry.calories} kcal</p>
-                <hr>
-            `;
-            foodListContent.appendChild(foodItem);
+                // Create a table to display the food data
+                let html = '<table class="table table-striped">';
+                html += '<thead><tr><th>Meal Type</th><th>Calories</th></tr></thead><tbody>';
+                response.food_entries.forEach(entry => {
+                    html += `<tr>
+                                <td>${entry.meal_type}</td>
+                                <td>${entry.calories}</td>
+                            </tr>`;
+                });
+                html += '</tbody></table>';
+
+                // Update the modal content with the generated table
+                foodListContent.innerHTML = html;
+            },
+            error: function () {
+                foodListContent.innerHTML = '<p>Failed to load food entries. Please try again later.</p>';
+            }
         });
 
         // Set the date in the view modal header
